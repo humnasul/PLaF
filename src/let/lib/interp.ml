@@ -66,6 +66,16 @@ let rec eval_expr : expr -> exp_val ea_result =
     string_of_env >>= fun str ->
     print_endline str; 
     error "Debug called"
+  | Tuple ( es ) -> failwith " Implement me ! "
+  | Untuple ( ids , e1 , e2 ) -> failwith " Implement me ! "
+    and
+    eval_exprs : expr list -> ( exp_val list ) ea_result =
+    fun es ->
+    match es with
+  | [] -> return []
+  | h :: t -> eval_expr h > >= fun i ->
+    eval_exprs t > >= fun l ->
+    return ( i :: l )
   | _ -> failwith "Not implemented yet!"
 
 (** [eval_prog e] evaluates program [e] *)
