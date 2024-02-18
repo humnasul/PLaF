@@ -70,7 +70,7 @@ let rec eval_expr : expr -> exp_val ea_result =
   | Hd ( e ) -> failwith " Implement me ! "
   | Tl ( e ) -> failwith " Implement me ! "
   | IsEmpty ( e ) -> failwith " Implement me ! "
-  | Emptylist ( _t ) -> failwith " Implement me ! "
+  | Emptylist ( _t ) -> return []
   | Tuple ( es ) -> failwith " Implement me ! "
   | Untuple ( ids , e1 , e2 ) -> failwith " Implement me ! "
   | _ -> failwith "Not implemented yet!"
