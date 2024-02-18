@@ -66,17 +66,22 @@ let rec eval_expr : expr -> exp_val ea_result =
     string_of_env >>= fun str ->
     print_endline str; 
     error "Debug called"
+  | Cons ( e1 , e2 ) -> failwith " Implement me ! "
+  | Hd ( e ) -> failwith " Implement me ! "
+  | Tl ( e ) -> failwith " Implement me ! "
+  | IsEmpty ( e ) -> failwith " Implement me ! "
+  | Emptylist ( _t ) -> failwith " Implement me ! "
   | Tuple ( es ) -> failwith " Implement me ! "
   | Untuple ( ids , e1 , e2 ) -> failwith " Implement me ! "
-    and
-    eval_exprs : expr list -> ( exp_val list ) ea_result =
-    fun es ->
-    match es with
-  | [] -> return []
-  | h :: t -> eval_expr h > >= fun i ->
-    eval_exprs t > >= fun l ->
-    return ( i :: l )
   | _ -> failwith "Not implemented yet!"
+
+and eval_exprs : expr list -> ( exp_val list ) ea_result =
+  fun es ->
+    match es with
+    | [] -> return []
+    | h :: t -> eval_expr h > >= fun i ->
+      eval_exprs t > >= fun l ->
+      return ( i :: l )
 
 (** [eval_prog e] evaluates program [e] *)
 let eval_prog (AProg(_,e)) =
@@ -87,6 +92,3 @@ let eval_prog (AProg(_,e)) =
 let interp (e:string) : exp_val result =
   let c = e |> parse |> eval_prog
   in run c
-  
-
-
