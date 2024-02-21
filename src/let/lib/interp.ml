@@ -70,7 +70,7 @@ let rec eval_expr : expr -> exp_val ea_result =
     eval_expr e1 >>= fun ev1 ->
     eval_expr e2 >>= fun ev2 ->
     list_of_listVal ev2 >>= fun b ->
-    return ListVal(ev1 :: b)
+    return (ListVal(ev1 :: b))
   | Hd ( e ) -> failwith " Implement me ! "
   | Tl ( e ) -> failwith " Implement me ! "
   | IsEmpty ( e ) -> 
