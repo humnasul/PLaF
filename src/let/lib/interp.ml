@@ -73,21 +73,6 @@ let rec eval_expr : expr -> exp_val ea_result =
     string_of_env >>= fun str ->
     print_endline str; 
     error "Debug called"
-  | Cons ( e1 , e2 ) -> 
-    eval_expr e1 >>= fun ev1 ->
-    eval_expr e2 >>= fun ev2 ->
-    list_of_listVal ev2 >>= fun b ->
-    return (ListVal(ev1 :: b))
-  | Hd ( e ) -> failwith " Implement me ! "
-  | Tl ( e ) -> failwith " Implement me ! "
-  | IsEmpty ( e ) -> 
-    eval_expr e >>=
-    list_of_listVal >>= fun b ->
-    return (BoolVal (b = []))
-  | EmptyList ( _t ) ->
-    return (ListVal [])
-  | Tuple ( es ) -> failwith " Implement me ! "
-  | Untuple ( ids , e1 , e2 ) -> failwith " Implement me ! "
   | _ -> failwith "Not implemented yet!"
 
 and eval_exprs : expr list -> ( exp_val list ) ea_result =
