@@ -4,6 +4,11 @@ open Parser_plaf.Parser
     
 let g_store = Store.empty_store 20 (NumVal 0)
 
+let rec addIds fs evs =
+  match fs , evs with
+  | [] ,[] -> []
+  | ( id ,(is_mutable, _ )) : : t1 , v : : t2 -> ( id ,( is_mutable , v )) : : addIds t1 t2
+  | _ , _ -> failwith " error : lists have different sizes "
 let rec eval_expr : expr -> exp_val ea_result = fun e ->
   match e with
   | Int(n) -> return @@ NumVal n
@@ -91,6 +96,23 @@ let rec eval_expr : expr -> exp_val ea_result = fun e ->
   | BeginEnd(es) ->
     sequence (List.map eval_expr es) >>= fun l ->
     return (List.hd (List.rev l))
+  | IsEqual ( e1 , e2 ) -> (* check that evaluation of e1 , e2 are NumVals *)
+    failwith " implement "
+  | IsGT ( e1 , e2 ) -> (* check that evaluation of e1 , e2 are NumVals *)
+    failwith " implement "
+  | IsLT ( e1 , e2 ) -> (* check that evaluation of e1 , e2 are NumVals *)
+    failwith " implement "
+  | IsNumber ( e ) ->
+    failwith " implement "
+  | Record ( fs ) ->
+    sequence ( List . map process field fs ) > >= fun evs ->
+    return ( RecordVal ( addIds fs evs ))
+  | Proj (e , id ) ->
+    failwith " implement "
+  | SetField ( e1 , id , e2 ) ->
+    failwith " implement "
+  | IsNumber ( e ) ->
+    failwith " implement "
   | Unit -> return UnitVal
   | Debug(_e) ->
     string_of_env >>= fun str_env ->
@@ -98,7 +120,20 @@ let rec eval_expr : expr -> exp_val ea_result = fun e ->
     in (print_endline (str_env^"\n"^str_store);
     error "Reached breakpoint")
   | _ -> failwith ("Not implemented: "^string_of_expr e)
-
+  and
+  process field ( id,(is_mutable,e)) =
+    eval_expr e > >= fun ev ->
+    if is_mutable
+    then return ( RefVal ( Store . new_ref g_store ev ))
+    else return ev
+  let rec sequence : ( ' a ea_result ) list -> ( ' a list ) ea_result =
+  fun cs ->
+  match cs with
+    | [] -> return []
+    | c : : t ->
+      c > >= fun v ->
+      sequence t > >= fun vs ->
+      return ( v : : vs )
 let eval_prog (AProg(_,e)) =
   eval_expr e         
 
