@@ -1,4 +1,9 @@
-
+(* Humna Sultan and Michelle Elias Flores
+   CS496 - HW #4
+   4/7/24
+   I pledge my honor that I have abided by the Stevens Honor System.
+   *)
+   
 (* Max exercise *)
 
 let n_left = { data <= 12; left <= 0; right <= 0}    (* 0 in head signals null *)

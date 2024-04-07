@@ -2,6 +2,12 @@ open Ds
 open Parser_plaf.Ast
 open Parser_plaf.Parser
 
+(* Humna Sultan and Michelle Elias Flores
+   CS496 - HW #4
+   4/7/24
+   I pledge my honor that I have abided by the Stevens Honor System.
+   *)
+
 let g_store = Store.empty_store 20 (NumVal 0)
 
 let rec addIds fs evs =
