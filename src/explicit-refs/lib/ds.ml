@@ -139,7 +139,7 @@ let rec string_of_expval = function
   | RefVal i -> "RefVal ("^string_of_int i^")"
   | RecordVal(fs) -> 
     "RecordVal("^ String.concat "," 
-    (List.map (fun (n,ev) -> n^"="^string_of_expval ev) fs) ^")"
+    (List.map (fun (n,(b,ev)) -> n^ (if b then "<=" else "=") ^string_of_expval ev) fs) ^")"
 and
    string_of_env' ac = function
   | EmptyEnv ->  "["^String.concat ",\n" ac^"]"

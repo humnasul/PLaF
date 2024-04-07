@@ -1,0 +1,27 @@
+
+(* Add exercise 3 *)
+
+let n_left = { data <= 12; left <= 0; right <= 0}    (* 0 in head signals null *)
+in let n_right = { data <= 44; left <= 0; right <= 0}
+in let n_root = { data <= 33; left <= n_left ; right <= n_right }
+in let t1 = { root <= n_root ; length <= 3} 
+in letrec add_bt_helper (nd) = proc (toAdd) { proc (par) { proc (t) {
+  if number?(t.root) then (
+    let new_node = { data <= toAdd; left <= 0; right <= 0}
+    in (t.root <= new_node)
+  )
+  else (if number?(nd) then (
+    if par.data >> toAdd then (
+        let adding = { data <= toAdd; left <= 0; right <= 0}
+        in (par.left <= adding)
+    ) else (
+        let adding = { data <= toAdd; left <= 0; right <= 0}
+        in (par.right <= adding)
+    )
+  ) else (if nd.data=toAdd then 0 else (if (nd.data << toAdd) then ((((add_bt_helper nd.right) toAdd) nd) t) else ((((add_bt_helper nd.left) toAdd) nd) t)  ))) }}}
+in let add_bt = proc (t) { proc (n) { ((((add_bt_helper t.root) n) t.root) t) } }
+in begin
+     ((add_bt t1) 23);
+     t1.length <= t1.length+1;
+     debug(t1)		
+   end
