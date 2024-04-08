@@ -1,6 +1,11 @@
 (* This file defines expressed values and environments *)
 open Parser_plaf.Ast
 
+(* Humna Sultan and Michelle Elias Flores
+   CS496 - HW #4
+   4/7/24
+   I pledge my honor that I have abided by the Stevens Honor System.
+   *)
 
 (* expressed values and environments are defined mutually recursively *)
 
