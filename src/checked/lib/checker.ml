@@ -2,6 +2,12 @@ open ReM
 open Dst
 open Parser_plaf.Ast
 open Parser_plaf.Parser
+
+let rec checkVals ( es ) = 
+  match es with
+  | [] -> []
+  | h::t -> return (DeRef(NewRef(h))) :: (checkVals (List.tl t))
+  (* type check every value in BeginEnd *)
        
 let rec chk_expr : expr -> texpr tea_result = function 
   | Int _n -> return IntType
@@ -58,7 +64,7 @@ let rec chk_expr : expr -> texpr tea_result = function
   | BeginEnd ([]) -> 
     return UnitType
   | BeginEnd ( es ) -> 
-    return (List.hd (List.rev (checkVals es)))
+    return @@ (List.hd (List.rev (checkVals es)))
   | Letrec([(_id,_param,None,_,_body)],_target) | Letrec([(_id,_param,_,None,_body)],_target) ->
     error "letrec: type declaration missing"
   | Letrec([(id,param,Some tParam,Some tRes,body)],target) ->
@@ -79,11 +85,6 @@ and
   chk_prog (AProg(_,e)) =
   chk_expr e
 
-let rec checkVals ( es ) = 
-  match es with
-  | [] -> []
-  | h::t -> return (DeRef(NewRef(h))) :: (checkVals (List.tl t))
-  (* type check every value in BeginEnd *)
 
 (* Type-check an expression *)
 let chk (e:string) : texpr result =
