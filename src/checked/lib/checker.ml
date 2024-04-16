@@ -41,6 +41,24 @@ let rec chk_expr : expr -> texpr tea_result = function
     if t1=t3
     then return t2
     else error "app: type of argument incorrect"
+  | NewRef (e) -> 
+    chk_expr e >>= fun ev ->
+    return @@ RefType ev
+  | DeRef (e) -> 
+    chk_expr e >>=  fun ev ->
+    (match ev with
+    | (RefType x) -> return x
+    | _ -> error "deref: invalid input")
+  | SetRef (e1 , e2 ) -> 
+    chk_expr e1 >>= fun n1 ->
+    chk_expr e2 >>= fun n2 ->
+    (match n1 with
+    | (RefType x) -> (if x = n2 then return UnitType else error "setref: type mismatch")
+    | _ -> error "setref: invalid input")
+  | BeginEnd ([]) -> 
+    return UnitType
+  | BeginEnd ( es ) -> 
+    return (List.hd (List.rev (checkVals es)))
   | Letrec([(_id,_param,None,_,_body)],_target) | Letrec([(_id,_param,_,None,_body)],_target) ->
     error "letrec: type declaration missing"
   | Letrec([(id,param,Some tParam,Some tRes,body)],target) ->
@@ -60,6 +78,12 @@ declaration")
 and
   chk_prog (AProg(_,e)) =
   chk_expr e
+
+let rec checkVals ( es ) = 
+  match es with
+  | [] -> []
+  | h::t -> return (DeRef(NewRef(h))) :: (checkVals (List.tl t))
+  (* type check every value in BeginEnd *)
 
 (* Type-check an expression *)
 let chk (e:string) : texpr result =
