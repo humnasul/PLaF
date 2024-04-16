@@ -47,6 +47,7 @@ let rec chk_expr : expr -> texpr tea_result = function
     if t1=t3
     then return t2
     else error "app: type of argument incorrect"
+  (* type-checking references *)
   | NewRef (e) -> 
     chk_expr e >>= fun ev ->
     return @@ RefType ev
@@ -65,6 +66,16 @@ let rec chk_expr : expr -> texpr tea_result = function
     return UnitType
   | BeginEnd ( es ) -> 
     return @@ (List.hd (List.rev (checkVals es)))
+  (* type-checking lists *)
+  | EmptyList (t) -> failwith " Implement me!"
+  | Cons (e1 , e2 ) -> failwith " Implement me!"
+  | IsEmpty (e ) -> failwith " Implement me!"
+  | Hd (e ) -> failwith " Implement me!"
+  | Tl (e ) -> failwith " Implement me!"
+  (* type-checking trees *)
+  | EmptyTree (t) -> failwith " Implement me!"
+  | Node (de , le , re ) -> failwith " Implement me!"
+  | CaseT ( target , emptycase , id1 , id2 , id3 , nodecase ) -> failwith " Implement me!"
   | Letrec([(_id,_param,None,_,_body)],_target) | Letrec([(_id,_param,_,None,_body)],_target) ->
     error "letrec: type declaration missing"
   | Letrec([(id,param,Some tParam,Some tRes,body)],target) ->
