@@ -2,6 +2,12 @@ open ReM
 open Dst
 open Parser_plaf.Ast
 open Parser_plaf.Parser
+
+(*
+   Humna Sultan and Michelle Elias Flores
+   CS496 HW5 - 4/19/24
+   I pledge my Honor that I have abided by the Stevens Honor System.
+   *)
        
 let rec chk_expr : expr -> texpr tea_result = function 
   | Int _n -> return IntType
@@ -125,13 +131,11 @@ and
   chk_prog (AProg(_,e)) =
   chk_expr e
 
-  and chk_exprs : expr list -> ( texpr list ) tea_result =
+  and chk_exprs : expr list -> texpr tea_result list =
     fun es ->
       match es with
-      | [] -> return []
-      | h :: t -> chk_expr h >>= fun i ->
-        chk_exprs t >>= fun l ->
-        return ( i :: l )
+      | [] -> []
+      | h :: t -> ( chk_expr h :: chk_exprs t )
     (* type check every value in BeginEnd *)
 
 
