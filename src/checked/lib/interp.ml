@@ -2,12 +2,6 @@ open Ds
 open ReM
 open Parser_plaf.Ast
 open Parser_plaf.Parser
-
-(*
-   Humna Sultan and Michelle Elias Flores
-   CS496 HW5 - 4/19/24
-   I pledge my Honor that I have abided by the Stevens Honor System.
-   *)
        
 let g_store = Store.empty_store 20 (NumVal 0)
 
@@ -109,4 +103,3 @@ let eval_prog (AProg(_,e)) =
 let interp (s:string) : exp_val result =
   let c = s |> parse |> eval_prog
   in run c
-

@@ -2,12 +2,6 @@ open ReM
 open Dst
 open Parser_plaf.Ast
 open Parser_plaf.Parser
-
-(*
-   Humna Sultan and Michelle Elias Flores
-   CS496 HW5 - 4/19/24
-   I pledge my Honor that I have abided by the Stevens Honor System.
-   *)
        
 let rec chk_expr : expr -> texpr tea_result = function 
   | Int _n -> return IntType
@@ -47,70 +41,6 @@ let rec chk_expr : expr -> texpr tea_result = function
     if t1=t3
     then return t2
     else error "app: type of argument incorrect"
-  (* type-checking references *)
-  | NewRef (e) -> 
-    chk_expr e >>= fun ev ->
-    return @@ RefType ev
-  | DeRef (e) -> 
-    chk_expr e >>=  fun ev ->
-    (match ev with
-    | (RefType x) -> return x
-    | _ -> error "deref: invalid input")
-  | SetRef (e1 , e2 ) -> 
-    chk_expr e1 >>= fun n1 ->
-    chk_expr e2 >>= fun n2 ->
-    (match n1 with
-    | (RefType x) -> (if x = n2 then return UnitType else error "setref: type mismatch")
-    | _ -> error "setref: invalid input")
-  | BeginEnd ([]) -> 
-    return UnitType
-  | BeginEnd ( es ) -> 
-    (List.hd (List.rev (chk_exprs es) ) )
-  (* type-checking lists *)
-  | EmptyList (t) -> 
-    (match t with 
-    | Some x -> return (ListType x)
-    | _ -> error "EmptyList: type mismatch")
-  | Cons (e1 , e2 ) -> (* return type of e2 if types of e1 and e2 match, else return error *)
-    chk_expr e1 >>= fun n1 ->
-    chk_expr e2 >>= fun n2 ->
-     (match n2 with
-      | (ListType x) -> (if x = n1 then return n2 else error "cons : type of head and tail do not match")
-      | _ -> error "cons: invalid input")
-  | IsEmpty (e ) -> 
-    chk_expr e >>= fun ev ->
-    (match ev with
-    | ListType _ | TreeType _ -> return (BoolType)
-    | _ -> error "IsEmpty: type mismatch" )
-  | Hd (e ) -> 
-    chk_expr e >>= fun ev ->
-      (match ev with
-      | (ListType x) -> return x
-      | _ -> error "Hd: invalid input")
-  | Tl (e ) -> 
-    chk_expr e >>= fun ev -> return ev
-  (* type-checking trees *)
-  | EmptyTree (t) -> 
-    (match t with 
-    | Some x -> return (TreeType x)
-    | _ -> error "EmptyTree: type mismatch")
-  | Node (de , le , re ) -> 
-    chk_expr de >>= fun n1 ->
-    chk_expr le >>= fun n2 ->
-    chk_expr re >>= fun n3 ->
-      (match n2,n3 with
-      | TreeType x, TreeType y -> (if x=y && y=n1 then return n2 else error "Node: type mismatch")
-      | _ -> error "Node: type mismatch")
-  | CaseT ( target , emptycase , id1 , id2 , id3 , nodecase ) ->
-    chk_expr target >>= fun e1 -> 
-    (match e1 with
-    | TreeType x -> chk_expr emptycase >>= fun e2 -> 
-      extend_tenv id1 x >>+
-      extend_tenv id2 e1 >>+
-      extend_tenv id3 e1 >>+
-      chk_expr nodecase >>= fun e3 -> (if e2=e3 then return e2 else error "CaseT: type mismatch")
-    | _ -> error "CaseT: type mismatch")
-
   | Letrec([(_id,_param,None,_,_body)],_target) | Letrec([(_id,_param,_,None,_body)],_target) ->
     error "letrec: type declaration missing"
   | Letrec([(id,param,Some tParam,Some tRes,body)],target) ->
@@ -131,14 +61,6 @@ and
   chk_prog (AProg(_,e)) =
   chk_expr e
 
-  and chk_exprs : expr list -> texpr tea_result list =
-    fun es ->
-      match es with
-      | [] -> []
-      | h :: t -> ( chk_expr h :: chk_exprs t )
-    (* type check every value in BeginEnd *)
-
-
 (* Type-check an expression *)
 let chk (e:string) : texpr result =
   let c = e |> parse |> chk_prog
@@ -147,6 +69,3 @@ let chk (e:string) : texpr result =
 let chkpp (e:string) : string result =
   let c = e |> parse |> chk_prog
   in run_teac (c >>= fun t -> return @@ string_of_texpr t)
-
-
-

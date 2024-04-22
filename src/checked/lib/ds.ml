@@ -2,12 +2,6 @@
 open ReM
 open Parser_plaf.Ast
 
-(*
-   Humna Sultan and Michelle Elias Flores
-   CS496 HW5 - 4/19/24
-   I pledge my Honor that I have abided by the Stevens Honor System.
-   *)
-
 type exp_val =
   | NumVal of int
   | BoolVal of bool
