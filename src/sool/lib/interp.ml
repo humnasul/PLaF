@@ -3,6 +3,12 @@ open ReM
 open Parser_plaf.Ast
 open Parser_plaf.Parser
 
+(*
+   Humna Sultan
+   CS496 EC - 5/5/24
+   I pledge my Honor that I have abided by the Stevens Honor System.
+   *)
+
 (* params * body * super * fields *)
 type method_decl = string list*expr*string*string list
 
@@ -19,30 +25,33 @@ let g_store = Store.empty_store 20 (NumVal 0)
 let g_class_env : class_env ref = ref []
 
 
+(* function for name mangling implementation *)
+let name_mangle n es =
+  n^"_"^string_of_int (List.length es)
 
 (* Initialize contents of g_class_env variable  *)
 
 let initialize_class_env cs =      
- (* Return all visible fields from class c_name 
-  * Note: Should produce an error if the super class does not exist,
- this is pending  *)
-  let rec get_fields =
-    fun cs c_name class_decls ->
-      match class_decls with
-      | [] -> []
-      | Class (name,super,_impl,fields,_methods)::_ when name=c_name ->
-        List.map fst fields :: get_fields cs super cs
-      | Class (_,_,_,_,_)::cs'  | Interface(_,_)::cs' ->
-        get_fields cs c_name cs'
-  in  
-  (* Return all visible methods from class c_name 
+  (* Return all visible fields from class c_name 
    * Note: Should produce an error if the super class does not exist,
-     this is pending   *)
+  this is pending  *)
+   let rec get_fields =
+     fun cs c_name class_decls ->
+       match class_decls with
+       | [] -> []
+       | Class (name,super,_impl,fields,_methods)::_ when name=c_name ->
+         List.map fst fields :: get_fields cs super cs
+       | Class (_,_,_,_,_)::cs'  | Interface(_,_)::cs' ->
+         get_fields cs c_name cs'
+   in  
+   (* Return all visible methods from class c_name 
+    * Note: Should produce an error if the super class does not exist,
+      this is pending   *)
   let rec get_methods cs c_name fss = function
     | [] -> []
     | Class (name,super,_impl,_fields,methods)::_  when name=c_name ->
       (List.map (fun (Method(n,_ret_type,pars,body))
-                  -> (n,(List.map fst pars,body,super,List.flatten fss)))
+                  -> ((name_mangle n pars),(List.map fst pars,body,super,List.flatten fss)))
          methods) @ get_methods cs super (List.tl fss) cs
     | Class (_,_,_,_,_)::cs'  | Interface(_,_)::cs'
       -> get_methods cs c_name fss cs'
@@ -53,7 +62,7 @@ let initialize_class_env cs =
       | Class (name,super,_impl,fields,methods)::cs'  ->
         let fss = (List.map fst fields) :: get_fields cs super cs
         in let ms = (List.map (fun (Method(n,_ret_type,pars,body))
-                                -> (n,(List.map fst pars,body,super,List.flatten fss)))
+                                -> ((name_mangle n pars),(List.map fst pars,body,super,List.flatten fss)))
                        methods) @ get_methods cs super (List.tl fss) cs
         in
         g_class_env := (name,(super,List.flatten fss,ms))::!g_class_env;
@@ -94,6 +103,21 @@ let lookup_method : string -> string -> class_env -> method_decl option =
   match List.assoc_opt c_name c_env with
   | None -> None
   | Some (_super,_fs,ms) -> List.assoc_opt m_name ms
+
+(* is_subclass and auxiliary functions *)
+       
+let rec parents : string -> class_env -> string list =
+  fun c_name c_env ->
+  c_name :: 
+  (match List.assoc_opt c_name c_env with
+  | None -> []
+  | Some (super,_fields,_methods) -> parents super c_env)
+
+let is_subclass : string -> string -> class_env -> exp_val ea_result = 
+  fun c_name1 c_name2 c_env ->
+  if List.mem_assoc c_name2 !g_class_env
+  then return (BoolVal (List.mem c_name2 @@ parents c_name1 c_env))
+  else error ("is_subclass: class "^c_name2^" not found")
 
 let rec apply_method : string -> exp_val -> exp_val list ->
   method_decl -> exp_val ea_result =
@@ -225,17 +249,16 @@ and
      | Some (_super,fields,methods) -> 
        new_env fields >>= fun env ->
        let self = ObjectVal(c_name,env)
-       in (match List.assoc_opt "initialize" methods with
+       in (match List.assoc_opt (name_mangle "initialize" es) methods with
            | None -> return self
-           | Some m -> apply_method "initialize" self args m >>= fun _ ->
-             return self))
+           | Some m -> apply_method (name_mangle "initialize" es) self args m >>= fun _ -> return self))
   | Send(e,m_name,es) ->
     eval_expr e >>= fun self ->
     obj_of_objectVal self >>= fun (c_name,_) ->
     eval_exprs es >>= fun args ->
-    (match lookup_method c_name m_name !g_class_env with
+    (match lookup_method c_name (name_mangle m_name es) !g_class_env with
      | None -> error "Method not found"
-     | Some m -> apply_method m_name self args m)
+     | Some m -> apply_method (name_mangle m_name es) self args m)
   | Self ->
     eval_expr (Var "_self")
   | Super(m_name,es) ->
@@ -243,9 +266,12 @@ and
     eval_expr (Var "_super") >>=
     string_of_stringVal >>= fun c_name ->
     eval_expr (Var "_self") >>= fun self ->
-    (match lookup_method c_name m_name !g_class_env with
+    (match lookup_method c_name (name_mangle m_name es) !g_class_env with
      | None -> error "Method not found"
-     | Some m -> apply_method m_name self args m)
+     | Some m -> apply_method (name_mangle m_name es) self args m)
+  | IsInstanceOf(e,id) -> eval_expr e >>= fun e -> (* defined is_subclass above *)
+    obj_of_objectVal e >>= fun(c_name, _) ->
+    is_subclass c_name id !g_class_env
   (* List operations* *)
   | List(es) ->
     eval_exprs es >>= fun args ->
